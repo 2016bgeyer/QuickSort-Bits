@@ -3,7 +3,6 @@ from random import randrange, randint
 import os
 import math
 max_comparisons = 0
-bitcounts = 0
 bitcomparisons = 0
 class Row():
 	def __init__(self, bitlist, places = 0):
@@ -75,8 +74,7 @@ def row_less_than(a, b):
 			break
  	# not counted as a separate comparison. They were already compared in the for loop
 	# I am just redoing the computation instead of storing it for convenience
-	estimated = a_bit <= b_bit
-	return estimated
+	return a_bit < b_bit
 
 def rejoin(less, x, more):
 	joined = less + [x] + more
@@ -86,7 +84,6 @@ def is_sorted(array):
 	return all(list_to_int(array[i].bitlist) <= list_to_int(array[i + 1].bitlist) for i in range(len(array)-1))
 
 def bitsquick(A, m):
-	global bitcounts, n_bits
 	# The input m indicates how many bits each element of the
 	# array A needs to be rotated to the right before the routine terminates,
 	
@@ -99,15 +96,11 @@ def bitsquick(A, m):
 	
 	rand_pivot_index = randrange(len(A))
 	x = A[rand_pivot_index]	# pivot number/row
-	# print(f'rand_pivot x: {x}')
-
-	m1 = 0
 	
 	if x.places < n_bits and x.bitlist[x.places] == 0:
 		m1 = 1
 		while x.places+m1 < n_bits and x.bitlist[x.places+m1] == 0:	# continue to first non-0 bit
 			m1 += 1
-		
 		for index, y in enumerate(A):
 			if index != rand_pivot_index:	# only consider rows that aren't the pivot
 				if row_less_than(y, x):	# y < x
@@ -139,38 +132,33 @@ def bitsquick(A, m):
 
 if __name__ == '__main__':
 	
-	n_runs = 5
-	for n_nums in [10000]:
-		for n_bits in [10, 15, 20, 25]:
+	n_runs = 20
+	for n_nums in [100, 1000, 10000]:
+		for n_bits in [10, 15, 20]:
 			all_runs = get_data(n_runs, n_nums, n_bits)
 
 			total_max_comparisons = 0
-			total_bitcounts = 0
 			total_bitcomparisons = 0
 
 			for arr in all_runs:
 				max_comparisons = 0
-				bitcounts = 0
 				bitcomparisons = 0
 				n = len(arr) 
 
 				sorted_arr = bitsquick(arr,0) 
 				# print(f'# of Comparisons total: {max_comparisons}')
-				# print(f'# of bitcounts: {bitcounts}')
 				# print(f'Final array is: {sorted_arr}')
 				if not is_sorted(sorted_arr):
 					print('NOT SORTED: ', sorted_arr[:100])
 				# print(f'The array is sorted: {is_sorted(sorted_arr)}')
 				
 				total_max_comparisons += max_comparisons
-				total_bitcounts += bitcounts
 				total_bitcomparisons += bitcomparisons
 			
 			print(f'\nn_nums: {n_nums}')
 			print(f'n_bits: {n_bits}')
 
 			print(f'Average max_comparisons (worst case without bit saving): {total_max_comparisons/n_runs}')
-			print(f'Average bitcounts: {total_bitcounts/n_runs}')
 			print(f'Average bitcomparisons: {total_bitcomparisons/n_runs}')
 			
 			expected = (2 + 3/math.log(2)) * n *math.log(n_nums) - n_nums*13.9 + math.log2(n_nums)
