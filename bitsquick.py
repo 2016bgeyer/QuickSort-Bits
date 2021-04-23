@@ -133,7 +133,7 @@ def bitsquick(A, m):
 if __name__ == '__main__':
 	
 	n_runs = 20
-	for n_nums in [100, 1000, 10000]:
+	for n_nums in [100, 1000, 10000, 20000]:
 		for n_bits in [10, 15, 20]:
 			all_runs = get_data(n_runs, n_nums, n_bits)
 
