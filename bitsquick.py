@@ -6,7 +6,7 @@ max_comparisons = 0
 bitcounts = 0
 bitcomparisons = 0
 class Row():
-	def __init__(self, bitlist, places = -1):
+	def __init__(self, bitlist, places = 0):
 		self.bitlist = bitlist
 		self.places = places	# places indicates the first unknown value index
 	
@@ -67,7 +67,7 @@ def row_less_than(a, b):
 	max_comparisons += 1 # n_bits - a.places # only compare the unknown bits (upper bound of upper_comparisons)
 	a_bit = 0
 	b_bit = 0
-	for i in range(a.places+1, n_bits):
+	for i in range(a.places, n_bits):
 		a_bit = a.bitlist[i]
 		b_bit = b.bitlist[i]
 		bitcomparisons += 1
@@ -102,13 +102,11 @@ def bitsquick(A, m):
 	# print(f'rand_pivot x: {x}')
 
 	m1 = 0
-	bitcounts += 1	# for either while comparison about to occur
 	
-	if x.places+1 < n_bits and x.bitlist[x.places+1] == 0:
+	if x.places < n_bits and x.bitlist[x.places] == 0:
 		m1 = 1
-		while x.places+1+m1 < n_bits and x.bitlist[x.places+m1+1] == 0:	# continue to first non-0 bit
+		while x.places+m1 < n_bits and x.bitlist[x.places+m1] == 0:	# continue to first non-0 bit
 			m1 += 1
-			bitcounts += 1
 		
 		for index, y in enumerate(A):
 			if index != rand_pivot_index:	# only consider rows that aren't the pivot
@@ -122,10 +120,8 @@ def bitsquick(A, m):
 		A = rejoin(A_less, x, A_more)
 	else:
 		m1 = 1
-		while x.places+1+m1 < n_bits and x.bitlist[x.places+m1+1] == 1:	# continue to first non-1 bit
+		while x.places+m1 < n_bits and x.bitlist[x.places+m1] == 1:	# continue to first non-1 bit
 			m1 += 1
-			bitcounts += 1
-			# print('bitcount')
 		for index, y in enumerate(A):
 			if index != rand_pivot_index:	# only consider rows that aren't the pivot
 				if row_less_than(y, x):	# y < x
