@@ -1,0 +1,53 @@
+n_nums: 100
+n_bits: 10
+Average comparisons: 628.5
+Average bitcounts: 132.55
+Expected # of Comparisons: 1530.8347503198108
+
+n_nums: 100
+n_bits: 15
+Average comparisons: 629.5
+Average bitcounts: 129.2
+Expected # of Comparisons: 1530.8347503198108
+
+n_nums: 100
+n_bits: 20
+Average comparisons: 638.5
+Average bitcounts: 127.6
+Expected # of Comparisons: 1530.8347503198108
+
+n_nums: 1000
+n_bits: 10
+Average comparisons: 11182.1
+Average bitcounts: 1355.65
+Expected # of Comparisons: 29822.829196235198
+
+n_nums: 1000
+n_bits: 15
+Average comparisons: 10856.6
+Average bitcounts: 1339.4
+Expected # of Comparisons: 29822.829196235198
+
+n_nums: 1000
+n_bits: 20
+Average comparisons: 10941.65
+Average bitcounts: 1340.9
+Expected # of Comparisons: 29822.829196235198
+
+n_nums: 10000
+n_bits: 10
+Average comparisons: 176294.45
+Average bitcounts: 17868.35
+Expected # of Comparisons: 443851.4665383867
+
+n_nums: 10000
+n_bits: 15
+Average comparisons: 156640.25
+Average bitcounts: 13336.4
+Expected # of Comparisons: 443851.4665383867
+
+n_nums: 10000
+n_bits: 20
+Average comparisons: 156374.7
+Average bitcounts: 13345.7
+Expected # of Comparisons: 443851.4665383867
