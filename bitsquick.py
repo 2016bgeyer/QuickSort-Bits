@@ -10,15 +10,8 @@ class Row():
 		self.bitlist = bitlist
 		self.places = places	# places indicates the first unknown value index
 	
-	def to_int(self, use_places = True):
-		index = self.places if use_places else 0
-		return list_to_int(self.bitlist[index:])
-
-	def __str__(self):
-		return str((self.bitlist, self.places, self.to_int(False)))
-	
 	def __repr__(self):
-		return str(self.to_int(False)) # str((self.bitlist, self.places, self.to_int(False)))
+		return str(list_to_int(self.bitlist)) # str((self.bitlist, self.places, list_to_int(self.bitlist)))
 
 def random_number(n_bits):
 	return [randint(0, 1) for _ in range(0, n_bits)]
@@ -90,7 +83,7 @@ def rejoin(less, x, more):
 	return joined
 
 def is_sorted(array):
-	return all(array[i].to_int(False) <= array[i + 1].to_int(False) for i in range(len(array)-1))
+	return all(list_to_int(array[i].bitlist) <= list_to_int(array[i + 1].bitlist) for i in range(len(array)-1))
 
 def bitsquick(A, m):
 	global bitcounts, n_bits
