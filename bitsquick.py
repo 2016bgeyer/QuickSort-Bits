@@ -161,5 +161,5 @@ if __name__ == '__main__':
 			print(f'Average max_comparisons (worst case without bit saving): {total_max_comparisons/n_runs}')
 			print(f'Average bitcomparisons: {total_bitcomparisons/n_runs}')
 			
-			expected = (2 + 3/math.log(2)) * n *math.log(n_nums) - n_nums*13.9 + math.log2(n_nums)
+			expected = (2 + 3/math.log(2)) * n_nums *math.log(n_nums) - n_nums*13.9 + math.log2(n_nums)
 			print(f'Expected # of Comparisons: {expected}')
