@@ -10,7 +10,8 @@ class Row():
 		self.places = places	# places indicates the first unknown value index
 	
 	def __repr__(self):
-		return str(list_to_int(self.bitlist)) # str((self.bitlist, self.places, list_to_int(self.bitlist)))
+		return str(list_to_int(self.bitlist))
+		# return str((list_to_int(self.bitlist), self.bitlist, self.places))
 
 def random_number(n_bits):
 	return [randint(0, 1) for _ in range(0, n_bits)]
@@ -97,8 +98,8 @@ def bitsquick(A, m):
 	rand_pivot_index = randrange(len(A))
 	x = A[rand_pivot_index]	# pivot number/row
 	
+	m1 = 1
 	if x.places < n_bits and x.bitlist[x.places] == 0:
-		m1 = 1
 		while x.places+m1 < n_bits and x.bitlist[x.places+m1] == 0:	# continue to first non-0 bit
 			m1 += 1
 		for index, y in enumerate(A):
@@ -112,7 +113,6 @@ def bitsquick(A, m):
 		A_more = bitsquick(A_more, 0)
 		A = rejoin(A_less, x, A_more)
 	else:
-		m1 = 1
 		while x.places+m1 < n_bits and x.bitlist[x.places+m1] == 1:	# continue to first non-1 bit
 			m1 += 1
 		for index, y in enumerate(A):
