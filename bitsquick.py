@@ -2,13 +2,13 @@
 from random import randrange, randint
 import os
 import math
-comparisons = 0
+max_comparisons = 0
 bitcounts = 0
 bitcomparisons = 0
 class Row():
-	def __init__(self, bitlist, places = 0):
+	def __init__(self, bitlist, places = -1):
 		self.bitlist = bitlist
-		self.places = places
+		self.places = places	# places indicates the first unknown value index
 	
 	def to_int(self, use_places = True):
 		index = self.places if use_places else 0
@@ -26,10 +26,11 @@ def random_number(n_bits):
 def get_data(n_runs, n_nums, n_bits):
 	runs = []
 	for i in range(n_runs):
+		if not os.path.exists('data'): # if the data dir doesn't exist, generate it
+			os.makedirs('data')
 		filename = f'data/{n_nums}_{n_bits}_{i}.txt'
 		if not os.path.exists(filename): # if the file doesn't exist, generate it
 			with open(filename, 'w+') as f:
-				# arr = [random_number(n_bits) for _ in range(n_nums)]
 				for _ in range(n_nums):
 					f.write(str(random_number(n_bits)) + '\n')
 		runs.append(read_bits(filename))
@@ -50,31 +51,14 @@ def rotate_array_right(array, m):
 	return array
 
 def rotate_row_right(row, m):
-	# rotate right by m places
-	# print(f'\nbeforerotate_row_right row: {row} -m: {-m}')
-	
 	row.places -= m
-	# if row.places > n_bits or m > n_bits:
-	# 	print(f'row: {row}')
-	# 	print(f'm: {m}')
-
-	# print(f'after rotate_row_right row: {row} -m: {-m}')
 	return row
 
 def rotate_row_left(row, m1):
 	# rotate the row left m1 places
 	# LM1 in the paper
-	# if m1!=0:
-	# 	print(f'beforerotate_row_left row: {row} m1: {m1}')
 	
 	row.places += m1
-	# row.places = m1
-	# if row.places > n_bits or m1 > n_bits:
-	# 	print(f'row: {row}')
-	# 	print(f'm1: {m1}')
-
-	# if m1!=0:
-	# 	print(f'after rotate_row_left row: {row} m1: {m1}')
 	return row
 
 def list_to_int(bitlist):
@@ -86,30 +70,20 @@ def list_to_int(bitlist):
 
 	
 def row_less_than(a, b):
-	global comparisons, n_bits, bitcomparisons
-	comparisons += max(n_bits, n_bits - a.places)# only compare the unknown bits (upper bound of upper_comparisons)
-	i = a.places
+	global max_comparisons, n_bits, bitcomparisons
+	max_comparisons += 1 # n_bits - a.places # only compare the unknown bits (upper bound of upper_comparisons)
 	a_bit = 0
 	b_bit = 0
-	bitcomparisons += 1
-	while i < n_bits and a_bit == b_bit:
+	for i in range(a.places+1, n_bits):
 		a_bit = a.bitlist[i]
 		b_bit = b.bitlist[i]
 		bitcomparisons += 1
-		i += 1
-
-	bitcomparisons += 1
+		if a_bit != b_bit:
+			break
+ 	# not counted as a separate comparison. They were already compared in the for loop
+	# I am just redoing the computation instead of storing it for convenience
 	estimated = a_bit <= b_bit
-	first = a.to_int()
-	second = b.to_int()
-	actual = first <= second
-	if estimated != actual:
-		print(f'\nfirst: {first}')
-		print(f'second: {second}')
-		print(f'actual: {actual}')
-		print(f'estimated: {estimated}')
-		exit(0)
-	return actual
+	return estimated
 
 def rejoin(less, x, more):
 	joined = less + [x] + more
@@ -119,7 +93,7 @@ def is_sorted(array):
 	return all(array[i].to_int(False) <= array[i + 1].to_int(False) for i in range(len(array)-1))
 
 def bitsquick(A, m):
-	global bitcounts
+	global bitcounts, n_bits
 	# The input m indicates how many bits each element of the
 	# array A needs to be rotated to the right before the routine terminates,
 	
@@ -135,15 +109,14 @@ def bitsquick(A, m):
 	# print(f'rand_pivot x: {x}')
 
 	m1 = 0
-
 	bitcounts += 1	# for either while comparison about to occur
-	# print('bitcount')
-	if x.bitlist[0] == 0:
-		# m1 = 1
-		while m1+1 < len(x.bitlist) and x.bitlist[m1+1] == 0:	# continue to first non-0 bit
+	
+	if x.places+1 < n_bits and x.bitlist[x.places+1] == 0:
+		m1 = 1
+		while x.places+1+m1 < n_bits and x.bitlist[x.places+m1+1] == 0:	# continue to first non-0 bit
 			m1 += 1
 			bitcounts += 1
-			# print('bitcount')
+		
 		for index, y in enumerate(A):
 			if index != rand_pivot_index:	# only consider rows that aren't the pivot
 				if row_less_than(y, x):	# y < x
@@ -155,8 +128,8 @@ def bitsquick(A, m):
 		A_more = bitsquick(A_more, 0)
 		A = rejoin(A_less, x, A_more)
 	else:
-		# m1 = 1
-		while m1+1 < len(x.bitlist) and x.bitlist[m1+1] == 1:	# continue to first non-1 bit
+		m1 = 1
+		while x.places+1+m1 < n_bits and x.bitlist[x.places+m1+1] == 1:	# continue to first non-1 bit
 			m1 += 1
 			bitcounts += 1
 			# print('bitcount')
@@ -172,53 +145,44 @@ def bitsquick(A, m):
 		A = rejoin(A_less, x, A_more)
 
 	right_rotated_result = rotate_array_right(A, m)
-	# print(f'right_rotated_result: {right_rotated_result}')
 	return right_rotated_result
 
 
 if __name__ == '__main__':
 	
-	# full_test = False
-	# filename = 'QuickSort.txt' if full_test else 'small_test.txt'
-	# f = open(filename, 'r')
-	# bit_length = 14
-	# arr = [Row(int_to_list(int(number_string), bit_length)) for number_string in f]
+	n_runs = 5
+	for n_nums in [10000]:
+		for n_bits in [10, 15, 20, 25]:
+			all_runs = get_data(n_runs, n_nums, n_bits)
 
-	n_runs = 20
-	for n_nums in [5000]:
-		for n_bits in [15]:
-			twenty_runs = get_data(n_runs, n_nums, n_bits)
-
-			total_comparisons = 0
+			total_max_comparisons = 0
 			total_bitcounts = 0
 			total_bitcomparisons = 0
 
-			for arr in twenty_runs:
-				comparisons = 0
+			for arr in all_runs:
+				max_comparisons = 0
 				bitcounts = 0
 				bitcomparisons = 0
 				n = len(arr) 
-				# print(f'n: {n}')
-				# print(f'Unsorted array is: {arr}')
 
 				sorted_arr = bitsquick(arr,0) 
-				# print(f'# of Comparisons total: {comparisons}')
+				# print(f'# of Comparisons total: {max_comparisons}')
 				# print(f'# of bitcounts: {bitcounts}')
 				# print(f'Final array is: {sorted_arr}')
 				if not is_sorted(sorted_arr):
 					print('NOT SORTED: ', sorted_arr[:100])
 				# print(f'The array is sorted: {is_sorted(sorted_arr)}')
 				
-				total_comparisons += comparisons
+				total_max_comparisons += max_comparisons
 				total_bitcounts += bitcounts
 				total_bitcomparisons += bitcomparisons
 			
 			print(f'\nn_nums: {n_nums}')
 			print(f'n_bits: {n_bits}')
 
-			print(f'Average comparisons: {total_comparisons/n_runs}')
+			print(f'Average max_comparisons (worst case without bit saving): {total_max_comparisons/n_runs}')
 			print(f'Average bitcounts: {total_bitcounts/n_runs}')
 			print(f'Average bitcomparisons: {total_bitcomparisons/n_runs}')
 			
-			expected = (2 + 3/math.log(2)) * n *math.log(n) - n*13.9 + math.log2(n)
+			expected = (2 + 3/math.log(2)) * n *math.log(n_nums) - n_nums*13.9 + math.log2(n_nums)
 			print(f'Expected # of Comparisons: {expected}')
